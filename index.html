@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOverse - El universo vivo que construyes con IA</title>
+    
+    <meta name="description" content="HOverse: mundo abierto tipo Minecraft en tu navegador. Construye, explora y mejora el juego con IA y comunidad.">
+    <meta name="keywords" content="juego, minecraft, webgl, threejs, comunidad, ia, open source">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="info">
+        <span class="logo">🌍 HOVERSE</span> | WASD: mover | Ratón: mirar | Click: jugar
+    </div>
+    
+    <div id="stats">
+        <span id="playerCount">👥 0</span> jugadores online | 🤖 IA activa
+    </div>
+    
+    <button id="donate-btn" onclick="window.open('https://ko-fi.com/hoverseproyect', '_blank')">
+        ☕ Apoyar HOverse
+    </button>
+    
+    <div id="controls-hint">
+        🖱️ Haz clic en el juego para comenzar
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
