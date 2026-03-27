@@ -80,7 +80,7 @@ function eliminarBloque(x, y, z) {
     return false;
 }
 
-function bloqueExiste(x, y, z) {
+function bloqueEn(x, y, z) {
     return bloques.has(`${Math.floor(x)},${Math.floor(y)},${Math.floor(z)}`);
 }
 
@@ -337,14 +337,15 @@ window.addEventListener('mousedown', (e) => {
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // ============================================================================
-// 🕹️ FÍSICA MEJORADA (SIN REBOTES, COMO MINECRAFT)
+// 🕹️ MOVIMIENTO 3D REAL (HORIZONTAL + SALTO)
+// El jugador NO vuela al mirar arriba, solo se mueve en el plano horizontal
 // ============================================================================
 const movimiento = { adelante: false, atras: false, izquierda: false, derecha: false };
 let velocidad = 7;
 let puedeSaltar = true;
 let velocidadY = 0;
-const gravedad = 25;
-const fuerzaSalto = 7.5;
+const gravedad = 28;
+const fuerzaSalto = 7.2;
 
 document.addEventListener('keydown', (e) => {
     switch(e.code) {
@@ -371,30 +372,32 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// Detección precisa de colisión con el suelo
+// ============================================================================
+// DETECCIÓN PRECISA DE SUELO (para no atravesar bloques)
+// ============================================================================
 function estaEnSuelo() {
     const pos = camera.position;
     const alturaOjos = 1.62;
+    const pieY = pos.y - alturaOjos;
     
-    // Puntos de contacto (esquinas del bounding box del jugador)
+    // Puntos de contacto (esquinas del jugador)
     const puntos = [
-        { x: pos.x - 0.3, z: pos.z - 0.3 },
-        { x: pos.x + 0.3, z: pos.z - 0.3 },
-        { x: pos.x - 0.3, z: pos.z + 0.3 },
-        { x: pos.x + 0.3, z: pos.z + 0.3 },
+        { x: pos.x - 0.35, z: pos.z - 0.35 },
+        { x: pos.x + 0.35, z: pos.z - 0.35 },
+        { x: pos.x - 0.35, z: pos.z + 0.35 },
+        { x: pos.x + 0.35, z: pos.z + 0.35 },
         { x: pos.x, z: pos.z }
     ];
     
     for (let punto of puntos) {
         const bloqueX = Math.floor(punto.x);
         const bloqueZ = Math.floor(punto.z);
-        const bloqueY = Math.floor(pos.y - alturaOjos - 0.1);
+        const bloqueY = Math.floor(pieY - 0.05);
         
         if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
-            // Ajustar posición exacta sobre el bloque
             const techoBloque = bloqueY + 1;
-            const diferencia = (pos.y - alturaOjos) - techoBloque;
-            if (Math.abs(diferencia) < 0.3) {
+            const distanciaAlTecho = techoBloque - pieY;
+            if (distanciaAlTecho >= 0 && distanciaAlTecho < 0.3) {
                 return true;
             }
         }
@@ -402,26 +405,45 @@ function estaEnSuelo() {
     return false;
 }
 
-// Evitar que el jugador se hunda en bloques
+// Evitar que el jugador se hunda en bloques o los atraviese
 function corregirColisionSuelo() {
     const pos = camera.position;
     const alturaOjos = 1.62;
     const pieY = pos.y - alturaOjos;
     
-    // Buscar bloque debajo
-    for (let yOff = 0; yOff <= 1; yOff++) {
-        const bloqueY = Math.floor(pieY + yOff);
-        const bloqueX = Math.floor(pos.x);
-        const bloqueZ = Math.floor(pos.z);
+    const bloqueX = Math.floor(pos.x);
+    const bloqueZ = Math.floor(pos.z);
+    const bloqueY = Math.floor(pieY - 0.1);
+    
+    if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
+        const techoBloque = bloqueY + 1;
+        if (pieY < techoBloque) {
+            camera.position.y = techoBloque + alturaOjos;
+            velocidadY = 0;
+            puedeSaltar = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Evitar que el jugador atraviese paredes (colisión horizontal)
+function corregirColisionParedes(dx, dz) {
+    const pos = camera.position;
+    const alturaOjos = 1.62;
+    const alturaPie = pos.y - alturaOjos;
+    const alturaCabeza = pos.y;
+    
+    // Verificar en las alturas del cuerpo
+    const alturas = [alturaPie, alturaPie + 0.8, alturaCabeza];
+    
+    for (let alt of alturas) {
+        const bloqueX = Math.floor(pos.x + dx);
+        const bloqueZ = Math.floor(pos.z + dz);
+        const bloqueY = Math.floor(alt);
         
         if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
-            const techoBloque = bloqueY + 1;
-            if (pieY < techoBloque && pieY > bloqueY - 0.5) {
-                camera.position.y = techoBloque + alturaOjos;
-                velocidadY = 0;
-                puedeSaltar = true;
-                return true;
-            }
+            return true; // Hay colisión
         }
     }
     return false;
@@ -435,36 +457,58 @@ function animate() {
     prevTime = now;
     
     if (controls.isLocked) {
-        // Movimiento horizontal
+        // ========== MOVIMIENTO HORIZONTAL (sin vuelo) ==========
         let dx = 0, dz = 0;
         if (movimiento.adelante) dz -= 1;
         if (movimiento.atras) dz += 1;
         if (movimiento.izquierda) dx -= 1;
         if (movimiento.derecha) dx += 1;
-        if (dx !== 0 || dz !== 0) { const len = Math.hypot(dx, dz); dx /= len; dz /= len; }
         
-        controls.moveRight(dx * velocidad * delta);
-        controls.moveForward(dz * velocidad * delta);
+        if (dx !== 0 || dz !== 0) {
+            const len = Math.hypot(dx, dz);
+            dx /= len;
+            dz /= len;
+        }
         
-        // Gravedad
+        // Movimiento con colisión en X
+        const movX = dx * velocidad * delta;
+        if (!corregirColisionParedes(movX, 0)) {
+            controls.moveRight(movX);
+        }
+        
+        // Movimiento con colisión en Z
+        const movZ = dz * velocidad * delta;
+        if (!corregirColisionParedes(0, movZ)) {
+            controls.moveForward(movZ);
+        }
+        
+        // ========== GRAVEDAD Y SALTO ==========
         velocidadY -= gravedad * delta;
         camera.position.y += velocidadY * delta;
         
         // Colisión con suelo
-        const enSuelo = estaEnSuelo();
-        if (enSuelo && velocidadY <= 0) {
+        if (estaEnSuelo() && velocidadY <= 0) {
             velocidadY = 0;
             puedeSaltar = true;
             corregirColisionSuelo();
         } else {
-            puedeSaltar = false;
+            // Si no está en suelo, no puede saltar
+            if (!estaEnSuelo()) puedeSaltar = false;
         }
         
-        // Evitar caer al vacío
-        if (camera.position.y < 1.6) {
-            camera.position.y = 1.6;
+        // Evitar caer al vacío (límite inferior)
+        if (camera.position.y < 1.62) {
+            camera.position.y = 1.62;
             velocidadY = 0;
             puedeSaltar = true;
+        }
+        
+        // Evitar que la cabeza atraviese techos
+        const cabezaY = Math.floor(camera.position.y);
+        const bloqueCabeza = `${Math.floor(camera.position.x)},${cabezaY},${Math.floor(camera.position.z)}`;
+        if (bloques.has(bloqueCabeza)) {
+            camera.position.y = cabezaY + 0.2;
+            velocidadY = -1;
         }
         
         // Luz que sigue al jugador
@@ -482,5 +526,5 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-console.log("%c🌍 HOVERSE | Física sólida sin rebotes | Construcción 3D total", "color:#7ec850; font-size:14px;");
-console.log("%c💡 ESPACIO para saltar | Click IZQ construir | Click DER destruir", "color:#ffaa66;");
+console.log("%c🌍 HOVERSE | Movimiento 3D REAL | No vuelas al mirar arriba", "color:#7ec850; font-size:14px;");
+console.log("%c💡 WASD: mover | ESPACIO: saltar | Click IZQ: construir | Click DER: destruir", "color:#ffaa66;");
