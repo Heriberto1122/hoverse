@@ -4,16 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>HOverse | El Linux de los motores gráficos</title>
-    <meta name="description" content="HOverse es un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro. Con $HOV, impulsamos la evolución hacia gráficos de nivel GTA y realidad virtual infinita.">
-    <meta name="keywords" content="hoverse, juego, minecraft, webgl, threejs, comunidad, ia, criptomoneda, gta, motor gráfico, oculus, realidad virtual">
+    <meta name="description" content="HOverse es un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro.">
     <meta name="author" content="Heriberto Ortiz">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hilarious-raindrop-83ceff.netlify.app">
-    <meta property="og:title" content="HOverse | El Linux de los motores gráficos">
-    <meta property="og:description" content="Un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro. De bloques a realismo infinito.">
-    <meta property="og:image" content="https://hilarious-raindrop-83ceff.netlify.app/preview.jpg">
     
     <style>
         * {
@@ -24,46 +16,39 @@
         
         body {
             font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0a0f1a 0%, #0c1220 100%);
+            background: #0a0f1a;
             color: #fff;
             overflow-x: hidden;
         }
         
-        /* El juego ocupa toda la pantalla al inicio */
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            background: #000;
-            overflow: hidden;
-        }
-        
-        #game-frame {
+        /* El canvas ocupa toda la pantalla */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            border: none;
+            z-index: 0;
+            display: block;
         }
         
-        /* Overlay semitransparente para el contenido sobre el juego */
-        .content-overlay {
+        /* Contenido superpuesto */
+        .content {
             position: relative;
             z-index: 10;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
+            background: transparent;
+            pointer-events: auto;
         }
         
-        /* Header fijo */
+        /* Header flotante */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(126, 200, 80, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
         
         .logo {
@@ -73,11 +58,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-        }
-        
-        .logo span {
-            color: #7ec850;
-            background: none;
         }
         
         .nav-buttons {
@@ -113,46 +93,18 @@
             border: 1px solid rgba(126, 200, 80, 0.5);
         }
         
-        .btn-secondary:hover {
-            background: rgba(126, 200, 80, 0.2);
-        }
-        
         .btn-outline {
             background: transparent;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
-        .btn-outline:hover {
-            border-color: #7ec850;
-        }
-        
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 100px 20px 80px;
-        }
-        
-        .hero h1 {
-            font-size: 64px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #fff, #7ec850, #ffaa66);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: fadeInUp 1s ease;
-        }
-        
-        .hero p {
-            font-size: 20px;
-            max-width: 700px;
-            margin: 0 auto 30px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        /* Secciones */
+        /* Secciones con fondo semitransparente */
         .section {
             padding: 80px 40px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            margin: 20px 0;
         }
         
         .section-title {
@@ -176,12 +128,6 @@
             padding: 30px;
             text-align: center;
             border: 1px solid rgba(126, 200, 80, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: #7ec850;
         }
         
         .feature-icon {
@@ -189,31 +135,14 @@
             margin-bottom: 20px;
         }
         
-        .feature-card h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: #ffaa66;
-        }
-        
-        /* Crypto */
-        .crypto-section {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(30, 40, 30, 0.8));
-            text-align: center;
-        }
-        
         .crypto-card {
             max-width: 800px;
             margin: 0 auto;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 30px;
             padding: 40px;
             border: 1px solid #ffaa66;
-        }
-        
-        .crypto-card h2 {
-            font-size: 48px;
-            color: #ffaa66;
-            margin: 20px 0;
+            text-align: center;
         }
         
         .tokenomics {
@@ -230,7 +159,6 @@
             color: #7ec850;
         }
         
-        /* Roadmap */
         .roadmap {
             display: flex;
             justify-content: center;
@@ -240,30 +168,18 @@
         }
         
         .roadmap-item {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 15px;
             padding: 20px;
-            width: 200px;
-            border-left: 3px solid #7ec850;
+            width: 180px;
             text-align: center;
+            border-left: 3px solid #7ec850;
         }
         
-        .roadmap-phase {
-            font-weight: bold;
-            color: #ffaa66;
-            margin-bottom: 10px;
-        }
-        
-        .phase-future {
-            border-left-color: #ffaa66;
-        }
-        
-        /* Footer */
         .footer {
             background: rgba(0, 0, 0, 0.8);
             padding: 40px;
             text-align: center;
-            border-top: 1px solid rgba(126, 200, 80, 0.2);
         }
         
         .footer-links {
@@ -283,25 +199,11 @@
             color: #7ec850;
         }
         
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
         @media (max-width: 768px) {
             .header {
                 padding: 15px 20px;
                 flex-direction: column;
                 gap: 15px;
-            }
-            .hero h1 {
-                font-size: 36px;
             }
             .section {
                 padding: 40px 20px;
@@ -321,122 +223,117 @@
             z-index: 1000;
             backdrop-filter: blur(5px);
         }
-        
-        .fullscreen-btn:hover {
-            background: #7ec850;
-            color: #000;
-        }
     </style>
 </head>
 <body>
 
-    <!-- El juego incrustado -->
-    <div id="game-container">
-        <iframe id="game-frame" src="https://hilarious-raindrop-83ceff.netlify.app/" title="HOverse Game"></iframe>
-    </div>
-
-    <!-- Contenido superpuesto (desplazable) -->
-    <div class="content-overlay">
+    <div class="content">
         <header class="header">
             <div class="logo">🌍 <span>HO</span>VERSE</div>
             <div class="nav-buttons">
-                <a href="https://hilarious-raindrop-83ceff.netlify.app/" target="_blank" class="btn btn-primary">🎮 Jugar Ahora</a>
+                <a href="#" id="play-now-btn" class="btn btn-primary">🎮 Jugar Ahora</a>
                 <a href="https://github.com/Heriberto1122/hoverse" target="_blank" class="btn btn-secondary">📂 GitHub</a>
                 <a href="#engine" class="btn btn-outline">🔧 Ver Motor</a>
             </div>
         </header>
 
-        <section class="hero">
-            <h1>El Linux de los<br>motores gráficos</h1>
-            <p>Un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro. De bloques a realismo infinito, juntos evolucionamos.</p>
-            <div class="hero-buttons">
-                <a href="https://hilarious-raindrop-83ceff.netlify.app/" target="_blank" class="btn btn-primary">🚀 Comenzar a Construir</a>
-                <a href="#crypto" class="btn btn-secondary">💰 Conoce $HOV</a>
-            </div>
+        <section class="hero" style="text-align:center; padding:100px 20px;">
+            <h1 style="font-size:64px; background:linear-gradient(135deg,#fff,#7ec850,#ffaa66); -webkit-background-clip:text; background-clip:text; color:transparent;">El Linux de los<br>motores gráficos</h1>
+            <p style="font-size:20px; max-width:700px; margin:20px auto;">Un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro. De bloques a realismo infinito.</p>
+            <a href="#" id="hero-play" class="btn btn-primary" style="margin-top:20px;">🚀 Comenzar a Construir</a>
         </section>
 
         <section class="section">
             <h2 class="section-title">¿Por qué HOverse?</h2>
             <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🧠</div>
-                    <h3>IA Evolutiva</h3>
-                    <p>La IA aprende de la comunidad y mejora el motor gráfico en tiempo real.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌍</div>
-                    <h3>Código Abierto</h3>
-                    <p>Como Linux, HOverse es de todos. Cualquiera puede contribuir y mejorar.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>Gráficos en Evolución</h3>
-                    <p>De bloques estilo Minecraft a gráficos de nivel GTA y más allá.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🕶️</div>
-                    <h3>Realidad Virtual</h3>
-                    <p>Compatibilidad con Oculus y mundos infinitos. El futuro es inmersivo.</p>
-                </div>
+                <div class="feature-card"><div class="feature-icon">🧠</div><h3>IA Evolutiva</h3><p>La IA aprende de la comunidad y mejora el motor gráfico en tiempo real.</p></div>
+                <div class="feature-card"><div class="feature-icon">🌍</div><h3>Código Abierto</h3><p>Como Linux, HOverse es de todos. Cualquiera puede contribuir.</p></div>
+                <div class="feature-card"><div class="feature-icon">🎨</div><h3>Gráficos en Evolución</h3><p>De bloques a gráficos nivel GTA y más allá.</p></div>
+                <div class="feature-card"><div class="feature-icon">🕶️</div><h3>Realidad Virtual</h3><p>Compatibilidad con Oculus y mundos infinitos.</p></div>
             </div>
         </section>
 
-        <section id="crypto" class="section crypto-section">
+        <section class="section" id="crypto">
             <div class="crypto-card">
                 <div class="feature-icon">💰</div>
                 <h2>$HOV Token</h2>
-                <p>La criptomoneda que impulsa la evolución de HOverse. Con $HOV financias el desarrollo del motor gráfico y formas parte del futuro.</p>
+                <p>La criptomoneda que impulsa la evolución de HOverse.</p>
                 <div class="tokenomics">
-                    <div class="token-item"><div class="token-value">1,000,000,000</div><div>Suministro Total</div></div>
-                    <div class="token-item"><div class="token-value">40%</div><div>Desarrollo Motor</div></div>
-                    <div class="token-item"><div class="token-value">30%</div><div>Comunidad</div></div>
-                    <div class="token-item"><div class="token-value">20%</div><div>IA & Evolución</div></div>
+                    <div><div class="token-value">1,000,000,000</div><div>Suministro Total</div></div>
+                    <div><div class="token-value">40%</div><div>Desarrollo Motor</div></div>
+                    <div><div class="token-value">30%</div><div>Comunidad</div></div>
                 </div>
-                <button class="btn btn-primary" id="crypto-btn" disabled style="background:#ffaa66; color:#000;">🚀 Próximamente - Whitelist Abierta</button>
-                <p style="font-size:12px; margin-top:20px;">$HOV será lanzada en 2025. Únete a la whitelist para ser de los primeros.</p>
+                <button class="btn btn-primary" disabled style="background:#ffaa66; color:#000;">🚀 Próximamente</button>
             </div>
         </section>
 
-        <section id="engine" class="section">
-            <h2 class="section-title">Hoja de Ruta del Motor</h2>
+        <section class="section" id="engine">
+            <h2 class="section-title">Hoja de Ruta</h2>
             <div class="roadmap">
-                <div class="roadmap-item"><div class="roadmap-phase">Fase 1 ✅</div>Mundo de bloques</div>
-                <div class="roadmap-item"><div class="roadmap-phase">Fase 2 🚧</div>Mejoras gráficas + IA</div>
-                <div class="roadmap-item"><div class="roadmap-phase">Fase 3 📅</div>Multijugador + $HOV</div>
-                <div class="roadmap-item"><div class="roadmap-phase">Fase 4 🌟</div>Gráficos nivel GTA</div>
-                <div class="roadmap-item"><div class="roadmap-phase">Fase 5 ♾️</div>Mundos infinitos</div>
-                <div class="roadmap-item phase-future"><div class="roadmap-phase">Fase 6 🕶️</div>Realidad Virtual (Oculus)</div>
-            </div>
-            <div style="text-align:center; margin-top:40px;">
-                <a href="https://github.com/Heriberto1122/hoverse" target="_blank" class="btn btn-secondary">📂 Ver repositorio en GitHub</a>
+                <div class="roadmap-item">Fase 1 ✅<br>Bloques</div>
+                <div class="roadmap-item">Fase 2 🚧<br>IA + Gráficos</div>
+                <div class="roadmap-item">Fase 3 📅<br>Multijugador + $HOV</div>
+                <div class="roadmap-item">Fase 4 🌟<br>Gráficos nivel GTA</div>
+                <div class="roadmap-item">Fase 5 ♾️<br>Mundos infinitos</div>
+                <div class="roadmap-item">Fase 6 🕶️<br>Realidad Virtual</div>
             </div>
         </section>
 
         <footer class="footer">
             <div class="footer-links">
                 <a href="https://github.com/Heriberto1122/hoverse" target="_blank">GitHub</a>
-                <a href="#">Documentación</a>
                 <a href="#">Whitepaper $HOV</a>
                 <a href="https://ko-fi.com/hoverseproyect" target="_blank">Donaciones</a>
-                <a href="#">Discord</a>
             </div>
-            <div class="copyright">© 2024 HOverse | Construyendo el futuro del gaming open source | Heriberto Ortiz</div>
+            <div class="copyright">© 2024 HOverse | Heriberto Ortiz</div>
         </footer>
     </div>
 
     <div class="fullscreen-btn" id="fullscreen-btn">🖥️ Pantalla Completa</div>
 
+    <!-- Importar el juego -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="game.js"></script>
+
     <script>
-        // Pantalla completa para el iframe
-        document.getElementById('fullscreen-btn').addEventListener('click', () => {
-            const iframe = document.getElementById('game-frame');
-            if (iframe) {
-                if (iframe.requestFullscreen) iframe.requestFullscreen();
-                else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
-                else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+        // Scroll suave al hacer clic en "Jugar Ahora" (desplaza hacia el canvas)
+        document.getElementById('play-now-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const canvas = document.querySelector('canvas');
+            if (canvas) canvas.scrollIntoView({ behavior: 'smooth' });
+            // Forzar bloqueo del cursor después de scroll
+            setTimeout(() => {
+                const event = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+                canvas?.dispatchEvent(event);
+            }, 500);
+        });
+        
+        document.getElementById('hero-play')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const canvas = document.querySelector('canvas');
+            if (canvas) canvas.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                const event = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+                canvas?.dispatchEvent(event);
+            }, 500);
+        });
+        
+        // Pantalla completa en el canvas
+        document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+            const canvas = document.querySelector('canvas');
+            if (canvas) {
+                if (canvas.requestFullscreen) canvas.requestFullscreen();
+                else if (canvas.webkitRequestFullscreen) canvas.webkitRequestFullscreen();
             }
         });
-
+        
         // Smooth scroll para enlaces internos
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
