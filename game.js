@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
 // ============================================================================
-// 🌍 MUNDO CON IA CONSTRUCTORA Y CONSTRUCCIÓN 3D COMPLETA
+// 🌍 MUNDO CON IA CONSTRUCTORA
 // ============================================================================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
@@ -20,7 +20,7 @@ const controls = new PointerLockControls(camera, document.body);
 renderer.domElement.addEventListener('click', () => controls.lock());
 
 // ============================================================================
-// 💡 LUCES MEJORADAS
+// 💡 LUCES
 // ============================================================================
 const ambientLight = new THREE.AmbientLight(0x5c6e6b);
 scene.add(ambientLight);
@@ -34,10 +34,6 @@ scene.add(sunLight);
 
 const playerLight = new THREE.PointLight(0xffaa66, 0.7, 15);
 scene.add(playerLight);
-
-const fillLight = new THREE.PointLight(0x88aaff, 0.3);
-fillLight.position.set(5, 10, 5);
-scene.add(fillLight);
 
 // ============================================================================
 // 🧱 SISTEMA DE BLOQUES
@@ -84,20 +80,22 @@ function eliminarBloque(x, y, z) {
     return false;
 }
 
+function bloqueExiste(x, y, z) {
+    return bloques.has(`${Math.floor(x)},${Math.floor(y)},${Math.floor(z)}`);
+}
+
 // ============================================================================
-// 🏔️ GENERAR MUNDO INICIAL (con colinas)
+// 🏔️ GENERAR MUNDO INICIAL
 // ============================================================================
 function generarMundo() {
     for (let x = -30; x <= 30; x++) {
         for (let z = -30; z <= 30; z++) {
-            // Terreno más variado
             const altura = Math.floor(
                 Math.sin(x * 0.25) * Math.cos(z * 0.25) * 2.5 +
                 Math.sin(x * 0.5) * 0.8 +
                 Math.cos(z * 0.5) * 0.8 +
                 2
             );
-            
             const alturaFinal = Math.max(0, Math.min(6, altura));
             
             for (let y = 0; y <= alturaFinal; y++) {
@@ -109,7 +107,7 @@ function generarMundo() {
         }
     }
     
-    // Árboles (más abundantes)
+    // Árboles
     for (let i = 0; i < 120; i++) {
         const x = Math.floor(Math.random() * 50) - 25;
         const z = Math.floor(Math.random() * 50) - 25;
@@ -134,14 +132,13 @@ function generarMundo() {
             crearBloque(x, sueloY + 3, z - 1, 'hoja');
         }
     }
-    
     console.log("✅ Mundo generado con " + bloques.size + " bloques");
 }
 
 generarMundo();
 
 // ============================================================================
-// 🧠 IA CONSTRUCTORA (genera cosas automáticamente)
+// 🧠 IA CONSTRUCTORA
 // ============================================================================
 let mensajeIA = document.createElement('div');
 mensajeIA.style.cssText = `
@@ -175,20 +172,17 @@ function iaConstructora() {
         { nombre: "🏠 una casita", construir: (x, z) => {
             const suelo = encontrarSuelo(x, z);
             if (suelo === null || suelo > 5) return false;
-            // Base de piedra
             for (let dx = -2; dx <= 2; dx++) {
                 for (let dz = -2; dz <= 2; dz++) {
                     crearBloque(x + dx, suelo, z + dz, 'piedra');
                 }
             }
-            // Paredes de ladrillo
             for (let dx = -2; dx <= 2; dx++) {
                 crearBloque(x + dx, suelo + 1, z - 2, 'ladrillo');
                 crearBloque(x + dx, suelo + 1, z + 2, 'ladrillo');
                 crearBloque(x - 2, suelo + 1, z + dx, 'ladrillo');
                 crearBloque(x + 2, suelo + 1, z + dx, 'ladrillo');
             }
-            // Techo
             crearBloque(x, suelo + 2, z, 'ladrillo');
             crearBloque(x, suelo + 3, z, 'diamante');
             return true;
@@ -206,7 +200,7 @@ function iaConstructora() {
             }
             return true;
         }},
-        { nombre: "🗼 una torre de piedra", construir: (x, z) => {
+        { nombre: "🗼 una torre", construir: (x, z) => {
             const suelo = encontrarSuelo(x, z);
             if (suelo === null) return false;
             for (let y = 0; y < 5; y++) {
@@ -216,16 +210,6 @@ function iaConstructora() {
                 crearBloque(x + 1, suelo + y, z + 1, 'piedra');
             }
             crearBloque(x, suelo + 5, z, 'diamante');
-            return true;
-        }},
-        { nombre: "💎 un montículo de diamantes", construir: (x, z) => {
-            const suelo = encontrarSuelo(x, z);
-            if (suelo === null) return false;
-            crearBloque(x, suelo, z, 'diamante');
-            crearBloque(x + 1, suelo, z, 'diamante');
-            crearBloque(x, suelo, z + 1, 'diamante');
-            crearBloque(x - 1, suelo, z, 'diamante');
-            crearBloque(x, suelo, z - 1, 'diamante');
             return true;
         }}
     ];
@@ -237,40 +221,36 @@ function iaConstructora() {
     while (intentos < 40 && !construido) {
         const x = Math.floor(Math.random() * 50) - 25;
         const z = Math.floor(Math.random() * 50) - 25;
-        
         let ocupado = false;
         for (let dx = -3; dx <= 3 && !ocupado; dx++) {
             for (let dz = -3; dz <= 3 && !ocupado; dz++) {
                 if (bloques.has(`${x + dx},2,${z + dz}`)) ocupado = true;
             }
         }
-        
         if (!ocupado && Math.abs(x) > 8 && Math.abs(z) > 8) {
             construido = idea.construir(x, z);
             if (construido) {
-                mensajeIA.innerHTML = `🧠 IA Constructora: "${idea.nombre}" apareció en (${x}, ${z}) 🌟`;
+                mensajeIA.innerHTML = `🧠 IA: "${idea.nombre}" apareció en (${x}, ${z}) 🌟`;
                 setTimeout(() => { if(mensajeIA) mensajeIA.innerHTML = `🧠 IA activa: construyendo el mundo...`; }, 5000);
             }
         }
         intentos++;
     }
-    
     setTimeout(iaConstructora, Math.random() * 35000 + 20000);
 }
 
 setTimeout(() => {
     iaConstructora();
-    mensajeIA.innerHTML = "🧠 IA Constructora activa: creando ciudades y paisajes...";
+    mensajeIA.innerHTML = "🧠 IA Constructora activa: creando ciudades...";
 }, 3000);
 
 // ============================================================================
-// 🎮 SISTEMA DE CONSTRUCCIÓN 3D COMPLETA (¡ARRIBA, ABAJO, PAREDES!)
+// 🎮 SISTEMA DE CONSTRUCCIÓN/DESTRUCCIÓN
 // ============================================================================
 const raycaster = new THREE.Raycaster();
 let modoConstruir = true;
 let bloqueActual = 'pasto';
 
-// Interfaz de usuario
 const ui = document.createElement('div');
 ui.style.cssText = `
     position: absolute;
@@ -294,8 +274,8 @@ ui.style.cssText = `
 ui.innerHTML = `
     <span>🔨 <span id="modo-text" style="color:#7ec850">CONSTRUIR</span></span>
     <span>📦 <span id="bloque-text">🌿 Pasto</span></span>
-    <span>🖱️ Click IZQUIERDO: Construir | Click DERECHO: Destruir</span>
-    <span>⌨️ 1-6: Bloques | M: Cambiar modo | ESPACIO: Saltar</span>
+    <span>🖱️ Click IZQ: Construir | DER: Destruir</span>
+    <span>⌨️ 1-6: Bloques | M: Modo | ESPACIO: Saltar</span>
 `;
 document.body.appendChild(ui);
 
@@ -306,7 +286,6 @@ function actualizarUI() {
 }
 actualizarUI();
 
-// Selección de bloques con teclas
 window.addEventListener('keydown', (e) => {
     const tecla = e.code;
     const bloquesLista = Object.keys(tiposBloque);
@@ -326,7 +305,6 @@ window.addEventListener('keydown', (e) => {
 function interactuar(event, esConstruir) {
     if (!controls.isLocked) return;
     
-    // Centro de la pantalla para el raycaster
     raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
     const intersects = raycaster.intersectObjects(Array.from(bloques.values()));
     
@@ -335,19 +313,15 @@ function interactuar(event, esConstruir) {
         const pos = bloque.userData;
         
         if (esConstruir) {
-            // Obtener la cara donde estamos mirando para colocar el bloque ADYACENTE
             const normal = intersects[0].face.normal;
             const nuevoX = pos.x + Math.round(normal.x);
             const nuevoY = pos.y + Math.round(normal.y);
             const nuevoZ = pos.z + Math.round(normal.z);
             const key = `${nuevoX},${nuevoY},${nuevoZ}`;
-            
-            // Limitar altura máxima de construcción
             if (!bloques.has(key) && nuevoY >= 0 && nuevoY < 12) {
                 crearBloque(nuevoX, nuevoY, nuevoZ, bloqueActual);
             }
         } else {
-            // Destruir bloque (excepto el suelo base en y=0)
             if (pos.y > 0) {
                 eliminarBloque(pos.x, pos.y, pos.z);
             }
@@ -357,26 +331,20 @@ function interactuar(event, esConstruir) {
 
 window.addEventListener('mousedown', (e) => {
     if (!controls.isLocked) return;
-    if (e.button === 0) {
-        e.preventDefault();
-        interactuar(e, modoConstruir);
-    }
-    if (e.button === 2) {
-        e.preventDefault();
-        interactuar(e, false);
-    }
+    if (e.button === 0) { e.preventDefault(); interactuar(e, modoConstruir); }
+    if (e.button === 2) { e.preventDefault(); interactuar(e, false); }
 });
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // ============================================================================
-// 🕹️ MOVIMIENTO 3D COMPLETO (CON SALTO)
+// 🕹️ FÍSICA MEJORADA (SIN REBOTES, COMO MINECRAFT)
 // ============================================================================
 const movimiento = { adelante: false, atras: false, izquierda: false, derecha: false };
 let velocidad = 7;
 let puedeSaltar = true;
 let velocidadY = 0;
-const gravedad = 20;
-const fuerzaSalto = 8;
+const gravedad = 25;
+const fuerzaSalto = 7.5;
 
 document.addEventListener('keydown', (e) => {
     switch(e.code) {
@@ -403,31 +371,57 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// Detección de colisión con el suelo
-function verificarColisionSuelo() {
-    const posicion = camera.position;
-    const alturaJugador = 1.6;
+// Detección precisa de colisión con el suelo
+function estaEnSuelo() {
+    const pos = camera.position;
+    const alturaOjos = 1.62;
     
-    // Revisar debajo del jugador
-    const pieX = Math.floor(posicion.x);
-    const pieY = Math.floor(posicion.y - alturaJugador);
-    const pieZ = Math.floor(posicion.z);
-    
-    if (bloques.has(`${pieX},${pieY},${pieZ}`)) {
-        return true;
-    }
-    
-    // Revisar esquinas
-    const esquinas = [
-        [Math.floor(posicion.x + 0.3), Math.floor(posicion.y - alturaJugador), Math.floor(posicion.z + 0.3)],
-        [Math.floor(posicion.x - 0.3), Math.floor(posicion.y - alturaJugador), Math.floor(posicion.z + 0.3)],
-        [Math.floor(posicion.x + 0.3), Math.floor(posicion.y - alturaJugador), Math.floor(posicion.z - 0.3)],
-        [Math.floor(posicion.x - 0.3), Math.floor(posicion.y - alturaJugador), Math.floor(posicion.z - 0.3)]
+    // Puntos de contacto (esquinas del bounding box del jugador)
+    const puntos = [
+        { x: pos.x - 0.3, z: pos.z - 0.3 },
+        { x: pos.x + 0.3, z: pos.z - 0.3 },
+        { x: pos.x - 0.3, z: pos.z + 0.3 },
+        { x: pos.x + 0.3, z: pos.z + 0.3 },
+        { x: pos.x, z: pos.z }
     ];
     
-    for (let [x, y, z] of esquinas) {
-        if (bloques.has(`${x},${y},${z}`)) {
-            return true;
+    for (let punto of puntos) {
+        const bloqueX = Math.floor(punto.x);
+        const bloqueZ = Math.floor(punto.z);
+        const bloqueY = Math.floor(pos.y - alturaOjos - 0.1);
+        
+        if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
+            // Ajustar posición exacta sobre el bloque
+            const techoBloque = bloqueY + 1;
+            const diferencia = (pos.y - alturaOjos) - techoBloque;
+            if (Math.abs(diferencia) < 0.3) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Evitar que el jugador se hunda en bloques
+function corregirColisionSuelo() {
+    const pos = camera.position;
+    const alturaOjos = 1.62;
+    const pieY = pos.y - alturaOjos;
+    
+    // Buscar bloque debajo
+    for (let yOff = 0; yOff <= 1; yOff++) {
+        const bloqueY = Math.floor(pieY + yOff);
+        const bloqueX = Math.floor(pos.x);
+        const bloqueZ = Math.floor(pos.z);
+        
+        if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
+            const techoBloque = bloqueY + 1;
+            if (pieY < techoBloque && pieY > bloqueY - 0.5) {
+                camera.position.y = techoBloque + alturaOjos;
+                velocidadY = 0;
+                puedeSaltar = true;
+                return true;
+            }
         }
     }
     return false;
@@ -452,20 +446,21 @@ function animate() {
         controls.moveRight(dx * velocidad * delta);
         controls.moveForward(dz * velocidad * delta);
         
-        // Gravedad y salto (3D completo)
+        // Gravedad
         velocidadY -= gravedad * delta;
         camera.position.y += velocidadY * delta;
         
-        // Colisión con el suelo
-        if (verificarColisionSuelo()) {
-            if (velocidadY <= 0) {
-                camera.position.y = Math.floor(camera.position.y) + 1.6;
-                velocidadY = 0;
-                puedeSaltar = true;
-            }
+        // Colisión con suelo
+        const enSuelo = estaEnSuelo();
+        if (enSuelo && velocidadY <= 0) {
+            velocidadY = 0;
+            puedeSaltar = true;
+            corregirColisionSuelo();
+        } else {
+            puedeSaltar = false;
         }
         
-        // Limitar caída máxima
+        // Evitar caer al vacío
         if (camera.position.y < 1.6) {
             camera.position.y = 1.6;
             velocidadY = 0;
@@ -487,5 +482,5 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-console.log("%c🌍 HOVERSE | IA Constructora activa | CONSTRUCCIÓN 3D TOTAL", "color:#7ec850; font-size:14px;");
-console.log("%c💡 Click IZQUIERDO: Construir | Click DERECHO: Destruir | ESPACIO: Saltar", "color:#ffaa66;");
+console.log("%c🌍 HOVERSE | Física sólida sin rebotes | Construcción 3D total", "color:#7ec850; font-size:14px;");
+console.log("%c💡 ESPACIO para saltar | Click IZQ construir | Click DER destruir", "color:#ffaa66;");
