@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>HOverse | El Linux de los motores gráficos</title>
-    <meta name="description" content="HOverse es un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro.">
+    <meta name="description" content="HOverse es un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro. Con $HOV, tú serás testigo, tendrás dinero real dentro y fuera del juego, y gobernarás el mundo.">
     <meta name="author" content="Heriberto Ortiz">
     
     <style>
@@ -21,7 +21,6 @@
             overflow-x: hidden;
         }
         
-        /* El canvas ocupa toda la pantalla */
         canvas {
             position: fixed;
             top: 0;
@@ -32,21 +31,23 @@
             display: block;
         }
         
-        /* Contenido superpuesto */
         .content {
             position: relative;
             z-index: 10;
             background: transparent;
+            pointer-events: none;
+        }
+        
+        .header, .hero, .section, .footer, .fullscreen-btn, .btn, a, button {
             pointer-events: auto;
         }
         
-        /* Header flotante */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(126, 200, 80, 0.3);
         }
@@ -93,13 +94,6 @@
             border: 1px solid rgba(126, 200, 80, 0.5);
         }
         
-        .btn-outline {
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Secciones con fondo semitransparente */
         .section {
             padding: 80px 40px;
             background: rgba(0, 0, 0, 0.5);
@@ -136,13 +130,22 @@
         }
         
         .crypto-card {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             border-radius: 30px;
             padding: 40px;
-            border: 1px solid #ffaa66;
+            border: 2px solid #ffaa66;
             text-align: center;
+            box-shadow: 0 0 30px rgba(255, 170, 102, 0.3);
+        }
+        
+        .crypto-highlight {
+            background: linear-gradient(135deg, #ffaa66, #ff884d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
         }
         
         .tokenomics {
@@ -208,6 +211,9 @@
             .section {
                 padding: 40px 20px;
             }
+            .hero h1 {
+                font-size: 36px !important;
+            }
         }
         
         .fullscreen-btn {
@@ -222,6 +228,56 @@
             cursor: pointer;
             z-index: 1000;
             backdrop-filter: blur(5px);
+            pointer-events: auto;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        
+        .hero h1 {
+            font-size: 64px;
+            background: linear-gradient(135deg, #fff, #7ec850, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .testigo-text {
+            font-size: 18px;
+            color: #ffaa66;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        .crypto-usos {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .crypto-usos li {
+            margin: 10px 0;
+            list-style: none;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .crypto-usos li:before {
+            content: "💰";
+            position: absolute;
+            left: 0;
         }
     </style>
 </head>
@@ -237,10 +293,10 @@
             </div>
         </header>
 
-        <section class="hero" style="text-align:center; padding:100px 20px;">
-            <h1 style="font-size:64px; background:linear-gradient(135deg,#fff,#7ec850,#ffaa66); -webkit-background-clip:text; background-clip:text; color:transparent;">El Linux de los<br>motores gráficos</h1>
-            <p style="font-size:20px; max-width:700px; margin:20px auto;">Un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro. De bloques a realismo infinito.</p>
-            <a href="#" id="hero-play" class="btn btn-primary" style="margin-top:20px;">🚀 Comenzar a Construir</a>
+        <section class="hero">
+            <h1>El Linux de los<br>motores gráficos</h1>
+            <p>Un universo vivo donde la IA y la comunidad construyen el motor gráfico del futuro.<br>De bloques a realismo infinito, juntos evolucionamos.</p>
+            <a href="#" id="hero-play" class="btn btn-primary">🚀 Comenzar a Construir</a>
         </section>
 
         <section class="section">
@@ -257,41 +313,70 @@
             <div class="crypto-card">
                 <div class="feature-icon">💰</div>
                 <h2>$HOV Token</h2>
-                <p>La criptomoneda que impulsa la evolución de HOverse.</p>
+                
+                <p style="font-size: 18px; margin-bottom: 15px;">
+                    <strong class="crypto-highlight">🌟 TÚ SERÁS TESTIGO DE LA EVOLUCIÓN DEL MOTOR GRÁFICO</strong><br>
+                    Cada bloque, cada shader, cada mejora visual será impulsada por la comunidad y por $HOV.
+                </p>
+                
+                <p style="font-size: 16px; margin-bottom: 20px;">
+                    <strong>$HOV es DINERO REAL dentro de HOverse y en el mundo real.</strong><br>
+                    Un token con valor real que podrás usar dentro del juego y convertir a moneda física.
+                </p>
+                
                 <div class="tokenomics">
                     <div><div class="token-value">1,000,000,000</div><div>Suministro Total</div></div>
-                    <div><div class="token-value">40%</div><div>Desarrollo Motor</div></div>
-                    <div><div class="token-value">30%</div><div>Comunidad</div></div>
+                    <div><div class="token-value">40%</div><div>Desarrollo del Motor</div></div>
+                    <div><div class="token-value">30%</div><div>Comunidad & IA</div></div>
+                    <div><div class="token-value">20%</div><div>Liquidez & Evolución</div></div>
                 </div>
-                <button class="btn btn-primary" disabled style="background:#ffaa66; color:#000;">🚀 Próximamente</button>
+                
+                <div class="crypto-usos">
+                    <strong>🎮 Cuando el motor esté avanzado (Fase 4+), $HOV te permitirá:</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>🏰 <strong>Proteger ciudades</strong> – Invierte $HOV para crear escudos y defender tus territorios</li>
+                        <li>🛡️ <strong>Gobernar regiones</strong> – Los poseedores de $HOV votan el desarrollo del mundo</li>
+                        <li>✨ <strong>Adquirir objetos exclusivos</strong> – Skins, bloques raros, efectos visuales únicos</li>
+                        <li>🌍 <strong>Comprar tierras virtuales</strong> – Dueño de parcelas en el universo HOverse</li>
+                        <li>🤝 <strong>Comerciar con otros jugadores</strong> – Economía real dentro del juego</li>
+                    </ul>
+                </div>
+                
+                <button id="crypto-waitlist-btn" class="btn btn-primary" style="background:#ffaa66; color:#000; margin-top: 20px;">🚀 Unirme a la Whitelist - Primeros testigos</button>
+                <p class="testigo-text">🌟 Tú serás parte de la historia. Desde los primeros bloques hasta el realismo total.</p>
+                <p style="font-size: 12px; margin-top: 15px;">*$HOV será lanzado en 2025 en Solana. La whitelist da acceso a los primeros compradores.</p>
             </div>
         </section>
 
         <section class="section" id="engine">
-            <h2 class="section-title">Hoja de Ruta</h2>
+            <h2 class="section-title">Hoja de Ruta hacia el Motor Definitivo</h2>
             <div class="roadmap">
-                <div class="roadmap-item">Fase 1 ✅<br>Bloques</div>
-                <div class="roadmap-item">Fase 2 🚧<br>IA + Gráficos</div>
+                <div class="roadmap-item">Fase 1 ✅<br>Mundo de bloques</div>
+                <div class="roadmap-item">Fase 2 🚧<br>IA + Mejoras gráficas</div>
                 <div class="roadmap-item">Fase 3 📅<br>Multijugador + $HOV</div>
                 <div class="roadmap-item">Fase 4 🌟<br>Gráficos nivel GTA</div>
                 <div class="roadmap-item">Fase 5 ♾️<br>Mundos infinitos</div>
-                <div class="roadmap-item">Fase 6 🕶️<br>Realidad Virtual</div>
+                <div class="roadmap-item">Fase 6 🕶️<br>Realidad Virtual (Oculus)</div>
+            </div>
+            <div style="text-align:center; margin-top: 40px;">
+                <p style="margin-bottom: 20px; font-size: 14px; color: #ffaa66;">Con $HOV, cada fase será más rápida. Tú decides la evolución del motor gráfico.</p>
+                <a href="https://github.com/Heriberto1122/hoverse" target="_blank" class="btn btn-secondary">📂 Ver el código en GitHub</a>
             </div>
         </section>
 
         <footer class="footer">
             <div class="footer-links">
                 <a href="https://github.com/Heriberto1122/hoverse" target="_blank">GitHub</a>
-                <a href="#">Whitepaper $HOV</a>
+                <a href="#" id="whitepaper-link">Whitepaper $HOV</a>
                 <a href="https://ko-fi.com/hoverseproyect" target="_blank">Donaciones</a>
+                <a href="#">Discord</a>
             </div>
-            <div class="copyright">© 2024 HOverse | Heriberto Ortiz</div>
+            <div class="copyright">© 2025 HOverse | Heriberto Ortiz | Construyendo el futuro del gaming open source</div>
         </footer>
     </div>
 
     <div class="fullscreen-btn" id="fullscreen-btn">🖥️ Pantalla Completa</div>
 
-    <!-- Importar el juego -->
     <script type="importmap">
         {
             "imports": {
@@ -303,29 +388,29 @@
     <script type="module" src="game.js"></script>
 
     <script>
-        // Scroll suave al hacer clic en "Jugar Ahora" (desplaza hacia el canvas)
+        function scrollToGame() {
+            const canvas = document.querySelector('canvas');
+            if (canvas) {
+                canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    const clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+                    canvas.dispatchEvent(clickEvent);
+                }, 300);
+            } else {
+                setTimeout(scrollToGame, 500);
+            }
+        }
+        
         document.getElementById('play-now-btn')?.addEventListener('click', (e) => {
             e.preventDefault();
-            const canvas = document.querySelector('canvas');
-            if (canvas) canvas.scrollIntoView({ behavior: 'smooth' });
-            // Forzar bloqueo del cursor después de scroll
-            setTimeout(() => {
-                const event = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
-                canvas?.dispatchEvent(event);
-            }, 500);
+            scrollToGame();
         });
         
         document.getElementById('hero-play')?.addEventListener('click', (e) => {
             e.preventDefault();
-            const canvas = document.querySelector('canvas');
-            if (canvas) canvas.scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => {
-                const event = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
-                canvas?.dispatchEvent(event);
-            }, 500);
+            scrollToGame();
         });
         
-        // Pantalla completa en el canvas
         document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
             const canvas = document.querySelector('canvas');
             if (canvas) {
@@ -334,7 +419,15 @@
             }
         });
         
-        // Smooth scroll para enlaces internos
+        document.getElementById('crypto-waitlist-btn')?.addEventListener('click', () => {
+            alert("📝 WHITELIST $HOV - PRIMEROS TESTIGOS\n\n✅ Recibirás notificación cuando el token esté listo\n✅ Acceso prioritario a compra\n✅ Serás reconocido en HOverse\n\n🚀 El motor gráfico evoluciona con tu apoyo.");
+        });
+        
+        document.getElementById('whitepaper-link')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert("📄 Whitepaper $HOV (Próximamente)\n\nExplicaremos:\n- Economía del token\n- Uso dentro del juego\n- Gobernanza de ciudades\n- Protección de territorios\n- Conversión a moneda real\n\nTú serás testigo de la evolución.");
+        });
+        
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
@@ -346,6 +439,14 @@
                     }
                 }
             });
+        });
+        
+        window.addEventListener('load', () => {
+            const canvas = document.querySelector('canvas');
+            if (canvas) {
+                canvas.setAttribute('tabindex', '0');
+                canvas.focus();
+            }
         });
     </script>
 </body>
