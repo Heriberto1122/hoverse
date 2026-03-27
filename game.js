@@ -226,7 +226,258 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
+// ============================================================
+// 🧠 SISTEMA DE IA EVOLUTIVA DE HOVERSE
+// La IA vive dentro del juego y mejora con cada contribución
+// ============================================================
 
+let iaPanelActivo = false;
+
+// --- BASE DE CONOCIMIENTO DE LA IA (evoluciona con cada mejora) ---
+let iaConocimiento = {
+    version: "0.1",
+    mejorasAplicadas: [],
+    criteriosEvaluacion: {
+        calidadGrafica: { peso: 30, descripcion: "¿Mejora visualmente el juego?" },
+        rendimiento: { peso: 25, descripcion: "¿Optimiza o al menos no empeora los FPS?" },
+        seguridad: { peso: 20, descripcion: "¿Código limpio sin vulnerabilidades?" },
+        compatibilidad: { peso: 15, descripcion: "¿Funciona en todos los navegadores?" },
+        documentacion: { peso: 10, descripcion: "¿Tiene comentarios claros?" }
+    }
+};
+
+// --- EVALUADORA IA (gratis, corre en el navegador) ---
+function evaluarCodigoConIA(codigo, descripcion) {
+    return new Promise((resolve) => {
+        // Simulamos análisis de IA (esto luego se conectará a modelo real)
+        setTimeout(() => {
+            const evaluacion = {
+                puntuacion: 0,
+                detalles: [],
+                sugerencias: [],
+                aprobado: false
+            };
+            
+            // 1. ANÁLISIS DE CALIDAD GRÁFICA (30%)
+            let calidadGrafica = 50; // base
+            if (codigo.includes('shader') || codigo.includes('material') || codigo.includes('texture')) {
+                calidadGrafica += 30;
+                evaluacion.detalles.push("✅ Detectada mejora gráfica potencial");
+            }
+            if (codigo.includes('light') || codigo.includes('shadow')) {
+                calidadGrafica += 20;
+                evaluacion.detalles.push("✅ Mejora en iluminación detectada");
+            }
+            if (codigo.includes('color') || codigo.includes('effect')) {
+                calidadGrafica += 15;
+                evaluacion.detalles.push("✅ Efectos visuales añadidos");
+            }
+            calidadGrafica = Math.min(100, calidadGrafica);
+            
+            // 2. ANÁLISIS DE RENDIMIENTO (25%)
+            let rendimiento = 70; // base
+            if (codigo.includes('requestAnimationFrame') || codigo.includes('optimize')) {
+                rendimiento += 20;
+                evaluacion.detalles.push("⚡ Optimización de rendimiento detectada");
+            }
+            if (codigo.includes('setInterval') && !codigo.includes('clearInterval')) {
+                rendimiento -= 30;
+                evaluacion.sugerencias.push("⚠️ setInterval sin clearInterval puede causar fugas de memoria");
+            }
+            rendimiento = Math.min(100, Math.max(0, rendimiento));
+            
+            // 3. ANÁLISIS DE SEGURIDAD (20%)
+            let seguridad = 80; // base
+            if (codigo.includes('innerHTML') && !codigo.includes('textContent')) {
+                seguridad -= 20;
+                evaluacion.sugerencias.push("🔒 Usar textContent en lugar de innerHTML para evitar XSS");
+            }
+            if (codigo.includes('eval(')) {
+                seguridad -= 50;
+                evaluacion.sugerencias.push("⚠️ EVITAR eval() por riesgos de seguridad");
+            }
+            
+            // 4. COMPATIBILIDAD (15%)
+            let compatibilidad = 85; // base
+            if (codigo.includes('webkit') || codigo.includes('moz')) {
+                compatibilidad += 10;
+                evaluacion.detalles.push("🌐 Prefijos de navegador incluidos");
+            }
+            
+            // 5. DOCUMENTACIÓN (10%)
+            let documentacion = codigo.includes('//') ? 80 : 30;
+            if (documentacion < 50) {
+                evaluacion.sugerencias.push("📝 Añadir comentarios explicativos al código");
+            }
+            
+            // CÁLCULO DE PUNTUACIÓN FINAL
+            evaluacion.puntuacion = Math.round(
+                (calidadGrafica * 0.30) +
+                (rendimiento * 0.25) +
+                (seguridad * 0.20) +
+                (compatibilidad * 0.15) +
+                (documentacion * 0.10)
+            );
+            
+            evaluacion.aprobado = evaluacion.puntuacion >= 75;
+            
+            if (evaluacion.aprobado) {
+                evaluacion.detalles.unshift(`🎉 ¡CÓDIGO APROBADO! Puntuación: ${evaluacion.puntuacion}/100`);
+                // Registrar mejora en conocimiento de IA
+                iaConocimiento.mejorasAplicadas.push({
+                    fecha: new Date().toISOString(),
+                    descripcion: descripcion,
+                    puntuacion: evaluacion.puntuacion,
+                    codigo: codigo.substring(0, 200)
+                });
+            } else {
+                evaluacion.detalles.unshift(`❌ CÓDIGO RECHAZADO. Puntuación: ${evaluacion.puntuacion}/100`);
+                evaluacion.sugerencias.push(`📈 Necesitas al menos 75 puntos. Faltan: ${75 - evaluacion.puntuacion} puntos`);
+            }
+            
+            resolve(evaluacion);
+        }, 1000);
+    });
+}
+
+// --- CREAR PANEL DE IA EN EL JUEGO ---
+function crearPanelIA() {
+    if (iaPanelActivo) return;
+    iaPanelActivo = true;
+    
+    const panel = document.createElement('div');
+    panel.id = 'ia-panel';
+    panel.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        max-width: 90vw;
+        max-height: 80vh;
+        background: rgba(10, 20, 30, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(126, 200, 80, 0.5);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        z-index: 10000;
+        font-family: monospace;
+        color: #eee;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    `;
+    
+    panel.innerHTML = `
+        <div style="padding: 20px; background: rgba(0,0,0,0.5); border-bottom: 1px solid #7ec850;">
+            <h2 style="margin:0; color:#7ec850;">🧠 IA Evolutiva de HOverse</h2>
+            <p style="margin:5px 0 0; font-size:12px;">Versión ${iaConocimiento.version} | Mejoras aplicadas: ${iaConocimiento.mejorasAplicadas.length}</p>
+        </div>
+        
+        <div style="padding: 20px; overflow-y: auto; flex:1;">
+            <label style="display:block; margin-bottom:10px;">📝 Describe tu mejora:</label>
+            <input type="text" id="ia-descripcion" placeholder="Ej: Añadir sombras dinámicas, mejorar agua, optimizar árboles..." 
+                   style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#1a2a2a; color:#fff; margin-bottom:15px;">
+            
+            <label style="display:block; margin-bottom:10px;">💻 Código JavaScript (mejora para game.js):</label>
+            <textarea id="ia-codigo" rows="10" placeholder="// Escribe aquí el código que propone mejorar HOverse...
+// Ejemplo: 
+// function mejorarSombras() {
+//     sunLight.shadow.mapSize.width = 2048;
+//     console.log('Sombras mejoradas!');
+// }" 
+                      style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#1a2a2a; color:#7ec850; font-family:monospace;"></textarea>
+            
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button id="ia-evaluar" style="flex:1; background:#7ec850; color:#1a2a2a; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">🤖 Evaluar con IA</button>
+                <button id="ia-cerrar" style="background:#444; border:none; padding:12px; border-radius:8px; cursor:pointer;">❌ Cerrar</button>
+            </div>
+            
+            <div id="ia-resultado" style="margin-top:20px; padding:15px; background:#0a0f0f; border-radius:8px; display:none;">
+                <div id="ia-resultado-contenido"></div>
+            </div>
+        </div>
+        
+        <div style="padding:12px; background:#0a0f0f; font-size:11px; text-align:center; border-top:1px solid #2a3a2a;">
+            🌱 HOverse crece con cada contribución | La IA aprende de tu código
+        </div>
+    `;
+    
+    document.body.appendChild(panel);
+    
+    // Eventos
+    document.getElementById('ia-evaluar').onclick = async () => {
+        const descripcion = document.getElementById('ia-descripcion').value;
+        const codigo = document.getElementById('ia-codigo').value;
+        
+        if (!codigo.trim()) {
+            alert("Escribe algo de código para evaluar");
+            return;
+        }
+        
+        const resultadoDiv = document.getElementById('ia-resultado');
+        const contenidoDiv = document.getElementById('ia-resultado-contenido');
+        
+        resultadoDiv.style.display = 'block';
+        contenidoDiv.innerHTML = '<div style="text-align:center">🤔 Analizando código con IA...</div>';
+        
+        const evaluacion = await evaluarCodigoConIA(codigo, descripcion);
+        
+        let html = `<div style="font-size:14px;">`;
+        html += `<strong>📊 Puntuación: ${evaluacion.puntuacion}/100</strong><br>`;
+        
+        if (evaluacion.aprobado) {
+            html += `<span style="color:#7ec850;">✅ APROBADO - ¡Mejora aceptada!</span><br>`;
+            html += `<br><strong>🎉 Detalles:</strong><ul>`;
+            evaluacion.detalles.forEach(d => html += `<li>${d}</li>`);
+            html += `</ul>`;
+            html += `<br><strong>💾 Esta mejora será integrada en HOverse.</strong>`;
+            html += `<br><br><button id="ia-aplicar-mejora" style="background:#7ec850; color:#000; padding:8px 16px; border:none; border-radius:6px; cursor:pointer;">🚀 Aplicar mejora ahora</button>`;
+        } else {
+            html += `<span style="color:#ff8888;">❌ RECHAZADO - Necesita mejoras</span><br>`;
+            html += `<br><strong>📋 Detalles:</strong><ul>`;
+            evaluacion.detalles.forEach(d => html += `<li>${d}</li>`);
+            html += `</ul>`;
+            if (evaluacion.sugerencias.length) {
+                html += `<br><strong>💡 Sugerencias de la IA:</strong><ul>`;
+                evaluacion.sugerencias.forEach(s => html += `<li>${s}</li>`);
+                html += `</ul>`;
+            }
+        }
+        html += `</div>`;
+        
+        contenidoDiv.innerHTML = html;
+        
+        if (evaluacion.aprobado) {
+            document.getElementById('ia-aplicar-mejora')?.addEventListener('click', () => {
+                try {
+                    // Evaluar el código propuesto (con cuidado)
+                    const funcionEvaluar = new Function(codigo);
+                    funcionEvaluar();
+                    alert("✅ Mejora aplicada con éxito. HOverse es un poco mejor gracias a ti.");
+                    cerrarPanelIA();
+                } catch (e) {
+                    alert("❌ Error al aplicar el código: " + e.message);
+                }
+            });
+        }
+    };
+    
+    document.getElementById('ia-cerrar').onclick = cerrarPanelIA;
+}
+
+function cerrarPanelIA() {
+    const panel = document.getElementById('ia-panel');
+    if (panel) panel.remove();
+    iaPanelActivo = false;
+}
+
+// --- AÑADIR OPCIÓN EN MENÚ CONTEXTUAL ---
+// Modificar la función crearMenuContextual para incluir opción de IA
+// (esto va dentro del array opciones en el menú que hicimos antes)
+
+// Si ya creaste el menú, añade esta opción:
+// { texto: "🧠 Proponer mejora a IA", accion: () => crearPanelIA() }
 // --- MENSAJE DE BIENVENIDA EN CONSOLA ---
 console.log('%c🌍 HOverse - El universo vivo que construyes con IA', 'color: #7ec850; font-size: 16px; font-weight: bold;');
 console.log('%cConstruye, explora y mejora el juego con la comunidad. ¡Bienvenido!', 'color: #ffaa66; font-size: 12px;');
