@@ -337,105 +337,76 @@ window.addEventListener('mousedown', (e) => {
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // ============================================================================
-// 🕹️ MOVIMIENTO 3D REAL (HORIZONTAL + SALTO)
-// El jugador NO vuela al mirar arriba, solo se mueve en el plano horizontal
+// 🕹️ MOVIMIENTO WASD + SALTO DE 3 BLOQUES
 // ============================================================================
-const movimiento = { adelante: false, atras: false, izquierda: false, derecha: false };
-let velocidad = 7;
-let puedeSaltar = true;
-let velocidadY = 0;
-const gravedad = 28;
-const fuerzaSalto = 7.2;
+const teclas = {
+    KeyW: false, KeyS: false, KeyA: false, KeyD: false
+};
 
+let velocidadMovimiento = 6.5;
+let velocidadY = 0;
+let enSuelo = true;
+const GRAVEDAD = 22;
+const FUERZA_SALTO = 8.5; // Suficiente para saltar 3 bloques de altura
+
+// Eventos de teclado
 document.addEventListener('keydown', (e) => {
-    switch(e.code) {
-        case 'KeyW': movimiento.adelante = true; break;
-        case 'KeyS': movimiento.atras = true; break;
-        case 'KeyA': movimiento.izquierda = true; break;
-        case 'KeyD': movimiento.derecha = true; break;
-        case 'Space': 
-            if (puedeSaltar && controls.isLocked) {
-                velocidadY = fuerzaSalto;
-                puedeSaltar = false;
-                e.preventDefault();
-            }
-            break;
+    if (teclas.hasOwnProperty(e.code)) {
+        teclas[e.code] = true;
+        e.preventDefault();
+    }
+    if (e.code === 'Space' && enSuelo && controls.isLocked) {
+        velocidadY = FUERZA_SALTO;
+        enSuelo = false;
+        e.preventDefault();
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    switch(e.code) {
-        case 'KeyW': movimiento.adelante = false; break;
-        case 'KeyS': movimiento.atras = false; break;
-        case 'KeyA': movimiento.izquierda = false; break;
-        case 'KeyD': movimiento.derecha = false; break;
+    if (teclas.hasOwnProperty(e.code)) {
+        teclas[e.code] = false;
+        e.preventDefault();
     }
 });
 
 // ============================================================================
-// DETECCIÓN PRECISA DE SUELO (para no atravesar bloques)
+// DETECCIÓN DE SUELO PRECISA
 // ============================================================================
-function estaEnSuelo() {
+function verificarSuelo() {
     const pos = camera.position;
     const alturaOjos = 1.62;
     const pieY = pos.y - alturaOjos;
     
-    // Puntos de contacto (esquinas del jugador)
-    const puntos = [
-        { x: pos.x - 0.35, z: pos.z - 0.35 },
-        { x: pos.x + 0.35, z: pos.z - 0.35 },
-        { x: pos.x - 0.35, z: pos.z + 0.35 },
-        { x: pos.x + 0.35, z: pos.z + 0.35 },
-        { x: pos.x, z: pos.z }
+    // Puntos de las esquinas del jugador
+    const offsets = [
+        { x: -0.35, z: -0.35 }, { x: 0.35, z: -0.35 },
+        { x: -0.35, z: 0.35 }, { x: 0.35, z: 0.35 },
+        { x: 0, z: 0 }
     ];
     
-    for (let punto of puntos) {
-        const bloqueX = Math.floor(punto.x);
-        const bloqueZ = Math.floor(punto.z);
+    for (let offset of offsets) {
+        const bloqueX = Math.floor(pos.x + offset.x);
+        const bloqueZ = Math.floor(pos.z + offset.z);
         const bloqueY = Math.floor(pieY - 0.05);
         
         if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
             const techoBloque = bloqueY + 1;
-            const distanciaAlTecho = techoBloque - pieY;
-            if (distanciaAlTecho >= 0 && distanciaAlTecho < 0.3) {
-                return true;
+            const distancia = techoBloque - pieY;
+            if (distancia >= 0 && distancia < 0.3) {
+                return { contacto: true, y: techoBloque };
             }
         }
     }
-    return false;
+    return { contacto: false, y: 0 };
 }
 
-// Evitar que el jugador se hunda en bloques o los atraviese
-function corregirColisionSuelo() {
+// ============================================================================
+// COLISIÓN HORIZONTAL (paredes)
+// ============================================================================
+function colisionHorizontal(dx, dz) {
     const pos = camera.position;
     const alturaOjos = 1.62;
-    const pieY = pos.y - alturaOjos;
-    
-    const bloqueX = Math.floor(pos.x);
-    const bloqueZ = Math.floor(pos.z);
-    const bloqueY = Math.floor(pieY - 0.1);
-    
-    if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
-        const techoBloque = bloqueY + 1;
-        if (pieY < techoBloque) {
-            camera.position.y = techoBloque + alturaOjos;
-            velocidadY = 0;
-            puedeSaltar = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-// Evitar que el jugador atraviese paredes (colisión horizontal)
-function corregirColisionParedes(dx, dz) {
-    const pos = camera.position;
-    const alturaOjos = 1.62;
-    const alturaPie = pos.y - alturaOjos;
-    const alturaCabeza = pos.y;
-    
-    // Verificar en las alturas del cuerpo
-    const alturas = [alturaPie, alturaPie + 0.8, alturaCabeza];
+    const alturas = [pos.y - alturaOjos, pos.y - alturaOjos + 0.8, pos.y];
     
     for (let alt of alturas) {
         const bloqueX = Math.floor(pos.x + dx);
@@ -443,72 +414,86 @@ function corregirColisionParedes(dx, dz) {
         const bloqueY = Math.floor(alt);
         
         if (bloques.has(`${bloqueX},${bloqueY},${bloqueZ}`)) {
-            return true; // Hay colisión
+            return true;
         }
     }
     return false;
 }
 
-let prevTime = performance.now();
+// ============================================================================
+// COLISIÓN CON TECHO (para que no atraviese)
+// ============================================================================
+function verificarTecho() {
+    const pos = camera.position;
+    const alturaCabeza = pos.y;
+    const bloqueCabeza = Math.floor(alturaCabeza);
+    const bloqueX = Math.floor(pos.x);
+    const bloqueZ = Math.floor(pos.z);
+    
+    if (bloques.has(`${bloqueX},${bloqueCabeza},${bloqueZ}`)) {
+        camera.position.y = bloqueCabeza - 0.1;
+        if (velocidadY > 0) velocidadY = 0;
+        return true;
+    }
+    return false;
+}
+
+let tiempoAnterior = performance.now();
 
 function animate() {
-    const now = performance.now();
-    let delta = Math.min(0.033, (now - prevTime) / 1000);
-    prevTime = now;
+    const ahora = performance.now();
+    let delta = Math.min(0.033, (ahora - tiempoAnterior) / 1000);
+    tiempoAnterior = ahora;
     
     if (controls.isLocked) {
-        // ========== MOVIMIENTO HORIZONTAL (sin vuelo) ==========
-        let dx = 0, dz = 0;
-        if (movimiento.adelante) dz -= 1;
-        if (movimiento.atras) dz += 1;
-        if (movimiento.izquierda) dx -= 1;
-        if (movimiento.derecha) dx += 1;
+        // ========== MOVIMIENTO HORIZONTAL WASD ==========
+        let moveX = 0, moveZ = 0;
+        if (teclas.KeyW) moveZ -= 1;
+        if (teclas.KeyS) moveZ += 1;
+        if (teclas.KeyA) moveX -= 1;
+        if (teclas.KeyD) moveX += 1;
         
-        if (dx !== 0 || dz !== 0) {
-            const len = Math.hypot(dx, dz);
-            dx /= len;
-            dz /= len;
+        if (moveX !== 0 || moveZ !== 0) {
+            const len = Math.hypot(moveX, moveZ);
+            moveX /= len;
+            moveZ /= len;
         }
         
-        // Movimiento con colisión en X
-        const movX = dx * velocidad * delta;
-        if (!corregirColisionParedes(movX, 0)) {
+        // Movimiento en X con colisión
+        const movX = moveX * velocidadMovimiento * delta;
+        if (!colisionHorizontal(movX, 0)) {
             controls.moveRight(movX);
         }
         
-        // Movimiento con colisión en Z
-        const movZ = dz * velocidad * delta;
-        if (!corregirColisionParedes(0, movZ)) {
+        // Movimiento en Z con colisión
+        const movZ = moveZ * velocidadMovimiento * delta;
+        if (!colisionHorizontal(0, movZ)) {
             controls.moveForward(movZ);
         }
         
         // ========== GRAVEDAD Y SALTO ==========
-        velocidadY -= gravedad * delta;
-        camera.position.y += velocidadY * delta;
+        const suelo = verificarSuelo();
         
-        // Colisión con suelo
-        if (estaEnSuelo() && velocidadY <= 0) {
+        if (suelo.contacto && velocidadY <= 0) {
+            // Está en el suelo
+            camera.position.y = suelo.y + 1.62;
             velocidadY = 0;
-            puedeSaltar = true;
-            corregirColisionSuelo();
+            enSuelo = true;
         } else {
-            // Si no está en suelo, no puede saltar
-            if (!estaEnSuelo()) puedeSaltar = false;
+            // Aplicar gravedad
+            enSuelo = false;
+            velocidadY -= GRAVEDAD * delta;
+            camera.position.y += velocidadY * delta;
         }
         
-        // Evitar caer al vacío (límite inferior)
+        // Verificar techo (para no atravesar)
+        verificarTecho();
+        
+        // Límite inferior (caída)
         if (camera.position.y < 1.62) {
             camera.position.y = 1.62;
             velocidadY = 0;
-            puedeSaltar = true;
-        }
-        
-        // Evitar que la cabeza atraviese techos
-        const cabezaY = Math.floor(camera.position.y);
-        const bloqueCabeza = `${Math.floor(camera.position.x)},${cabezaY},${Math.floor(camera.position.z)}`;
-        if (bloques.has(bloqueCabeza)) {
-            camera.position.y = cabezaY + 0.2;
-            velocidadY = -1;
+            enSuelo = true;
         }
         
         // Luz que sigue al jugador
@@ -526,5 +511,5 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-console.log("%c🌍 HOVERSE | Movimiento 3D REAL | No vuelas al mirar arriba", "color:#7ec850; font-size:14px;");
+console.log("%c🌍 HOVERSE | WASD funciona | Salta 3 bloques de altura", "color:#7ec850; font-size:14px;");
 console.log("%c💡 WASD: mover | ESPACIO: saltar | Click IZQ: construir | Click DER: destruir", "color:#ffaa66;");
