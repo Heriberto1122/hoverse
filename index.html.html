@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>HOverse - Mundo Vivo con IA Constructora</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        #ui {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 12px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            border: 1px solid #7ec850;
+            font-size: 14px;
+        }
+        #jugadores-lista {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            min-width: 180px;
+            z-index: 100;
+            font-size: 12px;
+            backdrop-filter: blur(5px);
+        }
+        .jugador-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+            border-bottom: 1px solid #333;
+        }
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        .construccion-ia {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #7ec850;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:0.6;} 50%{opacity:1;} }
+        select, button {
+            background: #1a2a2a;
+            color: white;
+            border: 1px solid #7ec850;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div>🌍 HOverse | 🧠 IA construye ciudades automáticamente | 👥 <span id="jugadores-online">0</span> online</div>
+        <div>
+            🔨 <span id="modo-text">CONSTRUIR</span> | 📦 <span id="bloque-text">🌿 Pasto</span>
+            <button id="cambiar-modo">M Cambiar modo</button>
+            <select id="selector-bloque">
+                <option value="pasto">🌿 Pasto</option>
+                <option value="tierra">🌱 Tierra</option>
+                <option value="piedra">🪨 Piedra</option>
+                <option value="madera">🪵 Madera</option>
+                <option value="diamante">💎 Diamante</option>
+            </select>
+        </div>
+    </div>
+    <div id="jugadores-lista">
+        <strong>👥 Jugadores (0)</strong>
+        <div id="lista-jugadores"></div>
+    </div>
+    <div class="construccion-ia">🧠 IA Constructora activa: creando ciudades y paisajes...</div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="/game.js"></script>
+</body>
+</html>
