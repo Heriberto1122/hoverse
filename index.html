@@ -162,6 +162,17 @@
             color: #7ec850;
         }
         
+        .token-address {
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #7ec850;
+        }
+        
         .roadmap {
             display: flex;
             justify-content: center;
@@ -279,6 +290,16 @@
             position: absolute;
             left: 0;
         }
+        
+        .btn-twitter {
+            background: #000000;
+            color: white;
+            border: 1px solid #ffffff;
+        }
+        .btn-twitter:hover {
+            background: #1DA1F2;
+            border-color: #1DA1F2;
+        }
     </style>
 </head>
 <body>
@@ -324,6 +345,13 @@
                     Un token con valor real que podrás usar dentro del juego y convertir a moneda física.
                 </p>
                 
+                <div class="token-address">
+                    🔗 <strong>$HOV en Solana</strong><br>
+                    Dirección del token:<br>
+                    <code>2BgSYFh8Ms9kJqHRUYh1vxp9jNGSL7mqafTVeRd5zaWN</code><br>
+                    <a href="https://solscan.io/token/2BgSYFh8Ms9kJqHRUYh1vxp9jNGSL7mqafTVeRd5zaWN" target="_blank" style="color: #7ec850; margin-top: 8px; display: inline-block;">🔍 Ver en Solscan (Explorador de Solana) →</a>
+                </div>
+                
                 <div class="tokenomics">
                     <div><div class="token-value">1,000,000,000</div><div>Suministro Total</div></div>
                     <div><div class="token-value">40%</div><div>Desarrollo del Motor</div></div>
@@ -342,9 +370,14 @@
                     </ul>
                 </div>
                 
-                <button id="crypto-waitlist-btn" class="btn btn-primary" style="background:#ffaa66; color:#000; margin-top: 20px;">🚀 Unirme a la Whitelist - Primeros testigos</button>
+                <div style="margin: 30px 0; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://discord.gg/6VpfaDqe" target="_blank" class="btn btn-primary" style="background: #5865F2;">💬 Discord</a>
+                    <a href="https://x.com/hoverse_token" target="_blank" class="btn btn-primary btn-twitter" style="background: #000000;">🐦 X (Twitter)</a>
+                    <button id="crypto-waitlist-btn" class="btn btn-secondary">🚀 Whitelist</button>
+                </div>
+                
                 <p class="testigo-text">🌟 Tú serás parte de la historia. Desde los primeros bloques hasta el realismo total.</p>
-                <p style="font-size: 12px; margin-top: 15px;">*$HOV será lanzado en 2025 en Solana. La whitelist da acceso a los primeros compradores.</p>
+                <p style="font-size: 12px; margin-top: 15px;">✅ <strong>$HOV ya está vivo en Solana.</strong> Síguenos en X (Twitter) y únete a Discord para recibir noticias.</p>
             </div>
         </section>
 
@@ -369,7 +402,8 @@
                 <a href="https://github.com/Heriberto1122/hoverse" target="_blank">GitHub</a>
                 <a href="#" id="whitepaper-link">Whitepaper $HOV</a>
                 <a href="https://ko-fi.com/hoverseproyect" target="_blank">Donaciones</a>
-                <a href="#">Discord</a>
+                <a href="https://discord.gg/6VpfaDqe" target="_blank">Discord</a>
+                <a href="https://x.com/hoverse_token" target="_blank">X (Twitter)</a>
             </div>
             <div class="copyright">© 2025 HOverse | Heriberto Ortiz | Construyendo el futuro del gaming open source</div>
         </footer>
